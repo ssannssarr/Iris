@@ -31,7 +31,6 @@ payload = payload = {
 
 resp = rq.post(url, headers=headers, json=payload)
 data = resp.json()
-print(data)
 message = data["choices"][0]["message"]
 
 msg = message.get("content")
