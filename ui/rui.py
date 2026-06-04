@@ -1,7 +1,8 @@
 from rich.console import Console
-from rich.panel import Panel 
+from rich.panel import Panel
 from rich.rule import Rule
 from ui.config import cdui
+from rich.markdown import Markdown as md
 import os
 import json
 
@@ -9,9 +10,10 @@ c = Console()
 def cp(*args, **kwargs):
     c.print(*args, **kwargs)
 
-def pnl(content):
+def pnl(*args, **kwargs):
     p = config("panel")
-    cp(Panel(content, border_style=f"{p}"))
+    kwargs.setdefault("border_style",p)
+    cp(Panel(*args,**kwargs))
 
 def rule(*args, **kwargs):
     cp(Rule(*args, **kwargs))
@@ -35,7 +37,7 @@ def prompt():
     return usr
 
 def cwd():
-    cwd = f"──── {os.getcwd()}"
+    cwd = f"──── [#e74d10]{os.getcwd()}[/]"
     return cwd
 
 
@@ -44,6 +46,13 @@ def end():
     rule(style="white")
     pnl("BYE")
 
+def think(*args, **kwargs):
+   rule("[cyan]───[/] [white]thinking...[/]", align="left", style="cyan")
+   cp(md(*args, **kwargs))
+
+def res(model,content):
+   rule(f"[cyan]───[/] {model} [white][/]", align="left", style="cyan")
+   cp(md(content))
 
 if __name__ == "__main__":
     prompt()
