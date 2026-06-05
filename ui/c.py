@@ -50,7 +50,7 @@ def statusline(model):
     model = model
     pr = config('prompt')
     st = config('statusline')
-    status = f"[{pr}]─[/] [{st}]Iris[/] [{pr}]|[/] [{st}]MODEL: {model}[/] [{pr}]|[/] [{st}]CWD: {cwd}[/]"
+    status = f"[{pr}]─[/] [{st}]Iris[/][{pr}]|[/][{st}]MODEL: {model}[/][{pr}]|[/][{st}]CWD: {cwd}[/]"
     return status
 
 

@@ -1,0 +1,4 @@
+{
+ "BASE_URL":"https://openrouter.ai/api/v1/chat/completions",
+ "MODEL":"openai/gpt-oss-120b:free"
+}

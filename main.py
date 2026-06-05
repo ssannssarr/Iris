@@ -1,16 +1,14 @@
-from ui.rui import cp,pnl,rule,prompt,c
-from logo import logo
+from ui.rui import cp,pnl,main_panel,prompt,c,reply,think
 
-def main_panel():
-    c.clear()
-    pnl(logo(), title="[white]アイリス[/]", title_align="left")
+c.clear()
 
-
-
+main_panel()
 
 usr_in=""
-
 while True:
-    usr_in = prompt()
-if __name__ == "__main__":
-   main_panel()
+    usr_in = prompt("openai/Iris")
+    if usr_in != "/exit":
+        continue
+    else:
+        think(f"you typed {usr_in}")
+        reply("* hiii")
