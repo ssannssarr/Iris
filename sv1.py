@@ -22,7 +22,7 @@ headers = {
     "Content-Type": "application/json"
 }
 
-usr_in = prompt()
+usr_in = prompt(F.get("MODEL"))
 
 payload = payload = {
     "model": f"{F.get('MODEL')}",

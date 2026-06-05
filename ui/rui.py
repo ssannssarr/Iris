@@ -28,17 +28,20 @@ def config(var):
         cdui()
 
 
-def prompt():
+def prompt(s):
     print('')
     pr = config('prompt')
-    rule(cwd(), style=f"{pr}" , align="left")
+    s = statusline(s)
+    rule(s, style=f"{pr}" , align="left")
     usr = input("❯ ").strip()
     rule(style="white")
     return usr
 
-def cwd():
-    cwd = f"──── [#e74d10]{os.getcwd()}[/]"
-    return cwd
+def statusline(model):
+    cwd = os.path.basename(os.getcwd()) or os.getcwd()
+    model = model
+    status = f"─ [bold]Iris[/] | MODEL: {model} | CWD: {cwd}"
+    return status
 
 
 def end():
@@ -55,4 +58,4 @@ def res(model,content):
    cp(md(content))
 
 if __name__ == "__main__":
-    prompt()
+    prompt("openai/Iris")
