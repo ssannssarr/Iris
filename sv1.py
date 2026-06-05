@@ -1,8 +1,7 @@
 import requests as rq
 import os
 import json
-from rich import print
-from ui.rui import prompt,pnl,think,res
+import requests as rq
 
 with open('.settings.json','r') as f:
     data = json.load(f)
@@ -12,9 +11,9 @@ model = data.get('MODEL')
 url = data.get('BASE_URL')
 
 F = {
-    "MODEL":model,
-    "KEY":api_key,
-    "URL":url
+     "MODEL":model,
+     "KEY":api_key,
+     "URL":url
 }
 
 headers = {
@@ -22,7 +21,6 @@ headers = {
     "Content-Type": "application/json"
 }
 
-usr_in = prompt(F.get("MODEL"))
 
 payload = payload = {
     "model": f"{F.get('MODEL')}",
