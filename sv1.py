@@ -42,7 +42,7 @@ def ask_ai(usr):
     try:
         resp = rq.post(url, headers=headers, json=payload,timeout=60)
         resp.raise_for_status()
-        return resp.json
+        return resp.json()
     except rq.exceptions.Timeout:
         return {"error":'Request Timeout'}
     except rq.exceptions.HTTPError as e:
@@ -54,10 +54,7 @@ def thinking(data):
     return data.get("choices",[{}])[0].get('message',{}).get('reasoning')
 
 def response(data):
-    message = data["choices"][0]["message"]
-    msg = message.get("content")
-    return msg
-
+    return data.get("choices",[{}])[0].get('message',{}).get('content')
 
 
 

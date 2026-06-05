@@ -61,16 +61,18 @@ def end():
     print("")
     rule(style="white")
     pnl("BYE")
-    time.sleep(1)
+    time.sleep(0.5)
     c.clear()
 
 def think(*args, **kwargs):
    rule("[cyan]───[/] [white]thinking...[/]", align="left", style="cyan")
    cp(md(*args, **kwargs))
+   print("\n")
 
 def reply(model,content):
    rule(f"[cyan]───[/] {model} [white][/]", align="left", style="cyan")
    cp(md(content))
+   print("\n")
 
 def main_panel():
     cwd = os.path.basename(os.getcwd()) or os.getcwd()

@@ -9,20 +9,23 @@ usr_in=""
 try:
     while True:
         usr_in = prompt(model)
-        if usr_in != "/exit":
-            data = ask_ai(usr=usr_in)
-            if "error" in data:
-                reply(model="error",content=data["error"])
-                continue
-            thnk = thinking(data=data)
-            think(thnk)
-            time.sleep(1)
-            res = response(data=data)
-            reply(model=model,content=res)
         if not usr_in:
             continue
-        else:
+        if usr_in == "/exit":
             end()
             break
+        data = ask_ai(usr=usr_in)
+
+        if "error" in data:
+            reply(model="error",content=data["error"])
+            continue
+        thnk = thinking(data=data)
+        think(thnk)
+
+        time.sleep(1) # A fake delay just for now
+
+        res = response(data=data)
+        reply(model=model,content=res)
+
 except KeyboardInterrupt:
     end()
