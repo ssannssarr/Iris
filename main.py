@@ -11,11 +11,16 @@ try:
         usr_in = prompt(model)
         if usr_in != "/exit":
             data = ask_ai(usr=usr_in)
+            if "error" in data:
+                reply(model="error",content=data["error"])
+                continue
             thnk = thinking(data=data)
             think(thnk)
             time.sleep(1)
             res = response(data=data)
             reply(model=model,content=res)
+        if not usr_in:
+            continue
         else:
             end()
             break

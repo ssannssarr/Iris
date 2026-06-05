@@ -1,13 +1,16 @@
-from rich.console import Console
-from rich.panel import Panel
-from rich.rule import Rule
 from rich.markdown import Markdown as md
-from rich.table import Table
-from rich.text import Text
+from rich.console import Console
 from rich.markup import escape
+from rich.panel import Panel
+from rich.table import Table
+from rich.rule import Rule
+from rich.text import Text
 from ui.logo import logo
-import os
+from sv1 import F
 import json
+import time
+import os
+
 try:
     from ui.config import cdui
 except ModuleNotFoundError:
@@ -58,6 +61,8 @@ def end():
     print("")
     rule(style="white")
     pnl("BYE")
+    time.sleep(1)
+    c.clear()
 
 def think(*args, **kwargs):
    rule("[cyan]───[/] [white]thinking...[/]", align="left", style="cyan")
@@ -68,13 +73,14 @@ def reply(model,content):
    cp(md(content))
 
 def main_panel():
+    cwd = os.path.basename(os.getcwd()) or os.getcwd()
     left = logo()
 
     right = Text()
-    right.append("")
-    right.append("model  gpt-oss\n", style="dim")
-    right.append("mode   chat\n", style="dim")
-    right.append("cwd    ~/Iris\n", style="dim")
+    right.append("\n")
+    right.append('\n')
+    right.append(f"model: {F.get("MODEL")}\n", style="dim")
+    right.append(f"cwd: {cwd}\n", style="dim")
 
     grid = Table.grid(expand=True)
     grid.add_column(width=40)
