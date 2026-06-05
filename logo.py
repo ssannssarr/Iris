@@ -50,5 +50,8 @@ def logo():
 def logo_p():
     cp(pain_flower(f))
 
+def height():
+    flower_height = len(f.strip("\n").splitlines())
+    return flower_height
 if __name__ == "__main__":
    logo_p()
