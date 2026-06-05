@@ -1,10 +1,13 @@
 from rich.console import Console
 from rich.panel import Panel
 from rich.rule import Rule
-from ui.config import cdui
 from rich.markdown import Markdown as md
 import os
 import json
+try:
+    from ui.config import cdui
+except ModuleNotFoundError:
+    from config import cdui
 
 c = Console()
 def cp(*args, **kwargs):
@@ -33,14 +36,16 @@ def prompt(s):
     pr = config('prompt')
     s = statusline(s)
     rule(s, style=f"{pr}" , align="left")
-    usr = input("❯ ").strip()
-    rule(style="white")
+    usr = input(" ❯ ").strip()
+    rule(style=f"{pr}")
     return usr
 
 def statusline(model):
     cwd = os.path.basename(os.getcwd()) or os.getcwd()
     model = model
-    status = f"─ [bold]Iris[/] | MODEL: {model} | CWD: {cwd}"
+    pr = config('prompt')
+    st = config('statusline')
+    status = f"[{pr}]─[/] [{st}]Iris[/] [{pr}|[/] [{st}]MODEL: {model}[/] [{pr}]|[/] [{st}]CWD: {cwd}[/]"
     return status
 
 
@@ -58,4 +63,4 @@ def res(model,content):
    cp(md(content))
 
 if __name__ == "__main__":
-    prompt("openai/Iris")
+    prompt("hiiii")
