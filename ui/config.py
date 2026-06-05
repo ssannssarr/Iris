@@ -6,6 +6,7 @@ UI_FILE = ".ui.json"
 default_ui = {
     'panel':"#e74d10",
     'prompt':'white',
+    'statusline':'white'
 }
 # CDUI stands for create default UI
 def cdui():
