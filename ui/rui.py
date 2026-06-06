@@ -6,15 +6,10 @@ from rich.table import Table
 from rich.rule import Rule
 from rich.text import Text
 from ui.logo import logo
+from ui.ui import ui
 from sv1 import F
-import json
 import time
 import os
-
-try:
-    from ui.config import cdui
-except ModuleNotFoundError:
-    from config import cdui
 
 c = Console()
 def cp(*args, **kwargs):
@@ -30,13 +25,7 @@ def rule(*args, **kwargs):
     cp(Rule(*processed, **kwargs))
 
 def config(var):
-    try:
-        with open('.ui.json' , 'r') as df:
-            ui_data = json.load(df)
-        p = f'{ui_data.get(var)}'
-        return f"{p}"
-    except FileNotFoundError:
-        cdui()
+    return ui.get(var, "")
 
 
 def prompt(s):

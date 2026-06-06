@@ -1,0 +1,5 @@
+ui = {
+    "panel": "bright_magenta",
+    "prompt": "white",
+    "statusline": "bold violet",
+}
