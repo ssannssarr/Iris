@@ -29,32 +29,70 @@ except RuntimeError as e:
 
 
 def ask_ai(usr):
-
     headers = {
-        "Authorization": f"Bearer {F.get('KEY')}",
-        "Content-Type": "application/json"
+        "Authorization": f"Bearer {F['KEY']}",
+        "Content-Type": "application/json",
     }
 
     payload = {
-        "model": f"{F.get('MODEL')}",
-        "messages": [{"role": "user","content": usr}]
+        "model": F["MODEL"],
+        "stream": True,
+        "messages": [{"role": "user", "content": usr}],
     }
+
+    full_text = ""
+    reasoning_text = ""
+
     try:
-        resp = rq.post(url, headers=headers, json=payload,timeout=60)
-        resp.raise_for_status()
-        return resp.json()
+        with rq.post(
+            F["URL"],
+            headers=headers,
+            json=payload,
+            stream=True,
+            timeout=60
+        ) as r:
+            r.raise_for_status()
+
+            for line in r.iter_lines():
+                if not line:
+                    continue
+
+                line = line.decode("utf-8")
+
+                if not line.startswith("data: "):
+                    continue
+
+                chunk = line[6:]
+
+                if chunk == "[DONE]":
+                    break
+
+                data = json.loads(chunk)
+                delta = data["choices"][0].get("delta", {})
+
+                reasoning = delta.get("reasoning", "")
+                if reasoning:
+                    reasoning_text += reasoning
+
+                text = delta.get("content", "")
+                if text:
+                    full_text += text
+
+        return {
+            "content": full_text,
+            "reasoning": reasoning_text,
+        }
+
     except rq.exceptions.Timeout:
-        return {"error":'Request Timeout'}
+        return {"error": "Request Timeout"}
     except rq.exceptions.HTTPError as e:
-        return {'error':f'HTTPError {e}'}
+        return {"error": f"HTTPError: {e}"}
     except rq.exceptions.RequestException as e:
-        return {'error':f'Network Error: {e}'}
+        return {"error": f"Network Error: {e}"}
 
 def thinking(data):
-    return data.get("choices",[{}])[0].get('message',{}).get('reasoning')
+    return data.get("reasoning") or ""
 
 def response(data):
-    return data.get("choices",[{}])[0].get('message',{}).get('content')
-
-
+    return data.get("content") or ""
 

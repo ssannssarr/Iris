@@ -66,12 +66,15 @@ def end():
 
 def think(*args, **kwargs):
    rule("[cyan]───[/] [white]thinking...[/]", align="left", style="cyan")
-   cp(md(*args, **kwargs))
+   if args and args[0]:
+      cp(md(*args, **kwargs))
+   else:
+      cp("[dim]No reasoning returned.[/dim]")
    print("\n")
 
 def reply(model,content):
    rule(f"[cyan]───[/] {model} [white][/]", align="left", style="cyan")
-   cp(md(content))
+   cp(md(content or ""))
    print("\n")
 
 def main_panel():
@@ -81,7 +84,7 @@ def main_panel():
     right = Text()
     right.append("\n")
     right.append('\n')
-    right.append(f"model: {F.get("MODEL")}\n", style="dim")
+    right.append(f"model: {F.get('MODEL')}\n", style="dim")
     right.append(f"cwd: {cwd}\n", style="dim")
 
     grid = Table.grid(expand=True)

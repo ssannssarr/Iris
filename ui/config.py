@@ -1,7 +1,7 @@
 import json 
 import os 
 
-UI_FILE = ".ui.json"
+UI_FILE = "~/Iris/.ui.json"
 
 default_ui = {
     'panel':"#e74d10",
