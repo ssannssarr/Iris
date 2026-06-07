@@ -1,10 +1,11 @@
 from ui.rui import main_panel,prompt,c,reply,think,end
 import time
 from sv1 import ask_ai,thinking,response,F
+from ui.msg_state import add,out,render
 
 c.clear()
-main_panel()
 model = F.get("MODEL")
+main_panel()
 usr_in=""
 try:
     while True:
@@ -19,13 +20,12 @@ try:
         if "error" in data:
             reply(model="error",content=data["error"])
             continue
-        thnk = thinking(data=data)
-        think(thnk)
-
-        time.sleep(1) # A fake delay just for now
-
+        add('user',usr_in)
         res = response(data=data)
-        reply(model=model,content=res)
-
-except KeyboardInterrupt:
+        add('Iris',res)
+        r = out()
+        c.clear()
+        main_panel()
+        render(r)
+except (KeyboardInterrupt,EOFError):
     end()
