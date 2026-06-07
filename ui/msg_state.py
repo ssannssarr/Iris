@@ -13,6 +13,6 @@ def out():
 
 def render(msg):
     for m in msg:
-        title='❯' if m['role'] == 'user' else ''
+        title='❯' if m['role'] == 'user' else '\n'
         r = m['text']
-        cp(md(title,r))
+        cp(md(f"{title} {r}"))
