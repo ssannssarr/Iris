@@ -1,6 +1,8 @@
 from rich.markdown import Markdown as md
 from ui.rui import cp,rule
 from prompts import SYSTEM_PROMPT
+from tools import expand_mentions
+
 messages = []
 
 def add(role,content):
@@ -27,6 +29,7 @@ def render(msg,model):
                 render_thinking(m['reasoning'])
             safe_text = text.replace("\n", "\n  ")
             cp(md(f"* {safe_text}"))
+
 def to_api():
     api = [
         {
@@ -39,6 +42,6 @@ def to_api():
         if m['role'] in ('user','assistant'):
             api.append({
                 "role":m['role'],
-                "content":m['text']
+                "content":expand_mentions(m['text']) if m['role'] == 'user' else m['text']
                 })
     return api

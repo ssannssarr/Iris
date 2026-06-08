@@ -1,8 +1,9 @@
+from prompt_toolkit.shortcuts import print_formatted_text
+from prompt_toolkit.formatted_text import FormattedText
+from prompt_toolkit.completion import Completer, Completion
 from rich.markdown import Markdown as md
 from prompt_toolkit import PromptSession
-from prompt_toolkit.formatted_text import FormattedText
 from prompt_toolkit.styles import Style
-from prompt_toolkit.shortcuts import print_formatted_text
 from rich.console import Console
 from rich.markup import escape
 from rich.panel import Panel
@@ -108,7 +109,7 @@ def _status_parts(model):
 # ══════════════════════════════════════════════════════════════════════
 #  Prompt & Queue Interactive Functions
 # ══════════════════════════════════════════════════════════════════════
-def prompt(model):
+def prompt(model): 
     """Show status rule → collect input with ❯ → close with a rule."""
     print('')
     _rule_ptk(_status_parts(model))
@@ -116,7 +117,7 @@ def prompt(model):
     _rule_ptk()
     return usr
 
-def queue(model, ai_done_event, first_chunk_received=None):
+def queue(model, ai_done_event, first_chunk_received=None): # This part is done by AI (gemini 3.5 flash (high) Through Antigravity!
     """Interactive queue prompt showing dynamic thinking animation spinner."""
     import time
     from prompt_toolkit.application.current import get_app
@@ -182,7 +183,7 @@ def queue(model, ai_done_event, first_chunk_received=None):
     # Print closing rule
     _rule_ptk()
 
-def show_queued_input(text, model):
+def show_queued_input(text, model): # This part is done by AI (gemini 3.5 flash (high) Through Antigravity!
     """Display a queued message as if the user typed it."""
     print('')
     _rule_ptk(_status_parts(model))
@@ -250,6 +251,8 @@ def main_panel():
     right = Text()
     right.append("\n")
     right.append('\n')
+    right.append("Iris by SannS")
+    right.append("\n")
     right.append(f"model: {F.get('MODEL')}\n", style="dim")
     right.append(f"cwd: {cwd}\n", style="dim")
 
@@ -265,6 +268,18 @@ def main_panel():
     )
 
     pnl(grid, title="[white]アイリス[/]", title_align="left")
+
+#class IrisCompleter(Completer):
+ #   def get_completions(self,document,complete_event):
+  #      text = document.text_before_cursor
+   #     word = document.get_word_before_cursor(WORD=True)
+
+    #    if text.startswith('@'):
+     #       query = word[1:]
+
+      #      for name in os.listdir("."):
+       #         if name.startswith(query):
+        #            suffix = "/" if os.path.isdir(name) else "" yield Completion(name + suffix, start_position=-len(query), display=name + suffix, display_meta="file" if os.path.isfile(name) else "dir",)
 
 if __name__ == "__main__":
     prompt("hiiii")
