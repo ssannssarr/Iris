@@ -18,12 +18,10 @@ def render(msg,model):
         text = m['text']
 
         if role == 'user':
-            cp(f"[on black white]❯ {text} [/]")
             print()
+            cp(f"[on black white]❯ {text} [/]")
         else:
-            rule(f"[cyan]───[/] {model} [white][/]", align="left", style="cyan")
-            cp(md(text))
-        print()
+            cp(md(f"* {text}"))
 
 def to_api():
     api = []

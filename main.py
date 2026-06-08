@@ -1,4 +1,4 @@
-from ui.rui import main_panel,prompt,c,reply,think,end
+from ui.rui import main_panel,prompt,c,reply,think,end,fake_prompt
 from ui.msg_state import to_api
 import time
 from sv1 import ask_ai,thinking,response,F
@@ -21,7 +21,7 @@ try:
         c.clear()
         main_panel()
         render(r,model=model)
-        prompt(model)
+        fake_prompt(model)
         data = ask_ai(messages=to_api())
 
         if "error" in data:

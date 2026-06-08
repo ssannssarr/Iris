@@ -89,6 +89,12 @@ def main_panel():
 
     pnl(grid, title="[white]アイリス[/]", title_align="left")
 
+def fake_prompt(s):
+    print('')
+    pr = config('prompt')
+    s = statusline(s)
+    rule(s, style=f"{pr}" , align="left")
+    print(" ❯ ")
 
 if __name__ == "__main__":
     prompt("hiiii")
