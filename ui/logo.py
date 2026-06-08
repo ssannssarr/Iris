@@ -28,7 +28,6 @@ COLOR_MAP = {
 
     "✿?": "#f5e8ff",
     " ": None,
-    "│":"bright_magenta"
 }
 
 
@@ -46,7 +45,3 @@ def paint_flower(FLOWER):
 
 def logo():
    return(paint_flower(f))
-
-
-
-    
