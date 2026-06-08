@@ -24,3 +24,14 @@ def render(msg,model):
             rule(f"[cyan]───[/] {model} [white][/]", align="left", style="cyan")
             cp(md(text))
         print()
+
+def to_api():
+    api = []
+
+    for m in messages:
+        if m['role'] in ('user','assistant'):
+            api.append({
+                "role":m['role'],
+                "content":m['text']
+                })
+    return api

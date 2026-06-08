@@ -28,7 +28,7 @@ except RuntimeError as e:
 
 
 
-def ask_ai(usr):
+def ask_ai(messages):
     headers = {
         "Authorization": f"Bearer {F['KEY']}",
         "Content-Type": "application/json",
@@ -37,9 +37,8 @@ def ask_ai(usr):
     payload = {
         "model": F["MODEL"],
         "stream": True,
-        "messages": [{"role": "user", "content": usr}],
+        "messages":messages,
     }
-
     full_text = ""
     reasoning_text = ""
 

@@ -1,4 +1,5 @@
 from ui.rui import main_panel,prompt,c,reply,think,end
+from ui.msg_state import to_api
 import time
 from sv1 import ask_ai,thinking,response,F
 from ui.msg_state import add,out,render
@@ -15,14 +16,14 @@ try:
         if usr_in == "/exit":
             end()
             break
-        data = ask_ai(usr=usr_in)
+        add('user',usr_in)
+        data = ask_ai(messages=to_api())
 
         if "error" in data:
             reply(model="error",content=data["error"])
             continue
-        add('user',usr_in)
         res = response(data=data)
-        add('Assistant',res)
+        add('assistant',res)
         r = out()
         c.clear()
         main_panel()
