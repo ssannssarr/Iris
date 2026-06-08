@@ -1,7 +1,7 @@
 import json 
 import os 
 
-UI_FILE = "~/Iris/.ui.json"
+UI_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".ui.json")
 
 default_ui = {
     'panel':"#e74d10",

@@ -12,10 +12,9 @@ def load_ui():
             return json.load(f)
     except FileNotFoundError:
         return {
-            "panel": "#89b4fa",
-            "thinking": "#74c7ec",
-            "assistant": "#a6e3a1",
-            "error": "#f38ba8"
+            "panel": "bright_magenta",
+            "prompt": "white",
+            "statusline": "bold violet"
         }
 
 
@@ -65,7 +64,13 @@ def pick_color(prompt):
         "\n3. Rich color name (cyan)"
     )
 
-    mode = input("\nColor type: ").strip()
+    while True:
+        mode = input("\nColor type: ").strip()
+        if mode in ("1", "2", "3"):
+            break
+        console.print(
+            "[red]Invalid option. Choose 1, 2 or 3[/]"
+        )
 
     while True:
         color = input(f"{prompt}: ").strip()
@@ -92,12 +97,6 @@ def pick_color(prompt):
 
         elif mode == "3":
             return color
-
-        else:
-            console.print(
-                "[red]Invalid option. Choose 1, 2 or 3[/]"
-            )
-            return pick_color(prompt)
 
 
 def main():

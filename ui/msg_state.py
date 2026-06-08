@@ -12,6 +12,8 @@ def add(role,content):
 def out():
     return messages
 
+from ui.rui import cp,rule,render_thinking
+
 def render(msg,model):
     for m in msg:
         role = m['role']
@@ -21,6 +23,8 @@ def render(msg,model):
             print()
             cp(f"[on black white]❯ {text} [/]")
         else:
+            if 'reasoning' in m and m['reasoning']:
+                render_thinking(m['reasoning'])
             safe_text = text.replace("\n", "\n  ")
             cp(md(f"* {safe_text}"))
 def to_api():
