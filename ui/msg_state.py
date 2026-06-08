@@ -1,18 +1,25 @@
 from rich.markdown import Markdown as md
-from ui.rui import cp
-msg = []
+from ui.rui import cp,rule
+
+messages = []
 
 def add(role,content):
-    msg.append({
+    messages.append({
         "role":role,
         "text":content
         })
 
 def out():
-    return msg
+    return messages
 
-def render(msg):
+def render(msg,model):
     for m in msg:
-        title='❯' if m['role'] == 'user' else '\n'
-        r = m['text']
-        cp(md(f"{title} {r}"))
+        role = m['role']
+        text = m['text']
+
+        if role == 'user':
+            cp(md(f"**❯** {text}"))
+        else:
+            rule(f"[cyan]───[/] {model} [white][/]", align="left", style="cyan")
+            cp(md(text))
+        print()

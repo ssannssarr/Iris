@@ -22,10 +22,10 @@ try:
             continue
         add('user',usr_in)
         res = response(data=data)
-        add('Iris',res)
+        add('Assistant',res)
         r = out()
         c.clear()
         main_panel()
-        render(r)
+        render(r,model=model)
 except (KeyboardInterrupt,EOFError):
     end()
