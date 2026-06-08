@@ -21,8 +21,8 @@ def render(msg,model):
             print()
             cp(f"[on black white]❯ {text} [/]")
         else:
-            cp(md(f"* {text}"))
-
+            safe_text = text.replace("\n", "\n  ")
+            cp(md(f"* {safe_text}"))
 def to_api():
     api = []
 
