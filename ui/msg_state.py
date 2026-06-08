@@ -1,6 +1,6 @@
 from rich.markdown import Markdown as md
 from ui.rui import cp,rule
-
+from prompts import SYSTEM_PROMPT
 messages = []
 
 def add(role,content):
@@ -28,7 +28,12 @@ def render(msg,model):
             safe_text = text.replace("\n", "\n  ")
             cp(md(f"* {safe_text}"))
 def to_api():
-    api = []
+    api = [
+        {
+         "role":"system",
+         "content":SYSTEM_PROMPT
+        }
+    ]
 
     for m in messages:
         if m['role'] in ('user','assistant'):
