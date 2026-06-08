@@ -1,4 +1,5 @@
 from rich.markdown import Markdown as md
+from prompt_toolkit import PromptSession
 from rich.console import Console
 from rich.markup import escape
 from rich.panel import Panel
@@ -11,6 +12,7 @@ from sv1 import F
 import time
 import os
 
+ses = PromptSession()
 c = Console()
 def cp(*args, **kwargs):
     c.print(*args, **kwargs)
@@ -33,7 +35,7 @@ def prompt(s):
     pr = config('prompt')
     s = statusline(s)
     rule(s, style=f"{pr}" , align="left")
-    usr = input(" ❯ ").strip()
+    usr = ses.prompt(" ❯ ").strip()
     rule(style=f"{pr}")
     return usr
 
