@@ -18,7 +18,7 @@ def render(msg,model):
         text = m['text']
 
         if role == 'user':
-            cp(md(f"**❯** {text}"))
+            cp(f"[on black white]❯ {text} [/]")
             print()
         else:
             rule(f"[cyan]───[/] {model} [white][/]", align="left", style="cyan")
