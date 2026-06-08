@@ -9,13 +9,12 @@ from ui.rui import (
     dequeue,
     style
 )
-from ui.msg_state import to_api
 import time
 import sys
 import shutil
 import threading
 from sv1 import ask_ai, thinking, response, F
-from ui.msg_state import add, out, render
+from ui.msg_state import add, out, render,to_api
 
 c.clear()
 model = F.get("MODEL")

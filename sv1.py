@@ -31,7 +31,6 @@ try:
         raise RuntimeError('IRIS_BASE_URL not found!!')
 except RuntimeError as e:
     print(f"[ERROR]: {type(e).__name__}: {e}")
-    sys.exit(1)
 
 
 
