@@ -75,16 +75,24 @@ Planned next:
 
 ```txt
 Iris/
+├── LICENSE
+├── README.md
 ├── main.py
-├── fl.py
-├── h.py
+├── prompts/
+│   ├── __init__.py
+│   └── sys.py
 ├── sv1.py
 ├── theme.py
+├── tools/
+│   ├── __init__.py
+│   ├── mentions.py
+│   └── read_file.py
 └── ui/
-    ├── c.py
     ├── config.py
     ├── logo.py
-    └── rui.py
+    ├── msg_state.py
+    ├── rui.py
+    └── ui.py
 ```
 
 ---
