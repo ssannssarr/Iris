@@ -19,6 +19,7 @@ def render(msg,model):
 
         if role == 'user':
             cp(md(f"**❯** {text}"))
+            print()
         else:
             rule(f"[cyan]───[/] {model} [white][/]", align="left", style="cyan")
             cp(md(text))
