@@ -17,6 +17,11 @@ try:
             end()
             break
         add('user',usr_in)
+        r = out()
+        c.clear()
+        main_panel()
+        render(r,model=model)
+        prompt(model)
         data = ask_ai(messages=to_api())
 
         if "error" in data:
