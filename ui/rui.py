@@ -1,18 +1,17 @@
 from prompt_toolkit.shortcuts import print_formatted_text
 from prompt_toolkit.formatted_text import FormattedText
 from prompt_toolkit.completion import Completer, Completion
-from rich.markdown import Markdown as md
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 from rich.console import Console
-from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 from rich.rule import Rule
 from rich.text import Text
 from ui.logo import logo
-from ui.ui import ui
-from sv1 import F
+from ui.theme import ui
+from llm import F
+from queue_state import enqueue, queue_size
 from tools import (
     has_pending_permission,
     get_pending_permission,
@@ -22,7 +21,6 @@ import time
 import os
 import re
 import shutil
-import queue as queue_module
 
 # ── Catppuccin-inspired prompt_toolkit style ──────────────────────────
 style = Style.from_dict({
@@ -81,23 +79,6 @@ class AtPathCompleter(Completer):
 
 ses = PromptSession(style=style, completer=AtPathCompleter())
 c = Console()
-
-# ══════════════════════════════════════════════════════════════════════
-#  Message Queue
-# ══════════════════════════════════════════════════════════════════════
-_msg_queue = queue_module.Queue()
-
-def queue_size():
-    return _msg_queue.qsize()
-
-def enqueue(text):
-    _msg_queue.put(text)
-
-def dequeue():
-    try:
-        return _msg_queue.get_nowait()
-    except queue_module.Empty:
-        return None
 
 # ══════════════════════════════════════════════════════════════════════
 #  UI styling & layout functions
@@ -206,7 +187,7 @@ def queue(model, ai_done_event, first_chunk_received=None): # This part is done 
     # Define dynamic prompt function
     def get_prompt_text():
         frame = spinner_frames[spinner_index % len(spinner_frames)]
-        q = _msg_queue.qsize()
+        q = queue_size()
         
         parts = [
             ('class:spinner', f' {frame} '),
@@ -258,8 +239,8 @@ def queue(model, ai_done_event, first_chunk_received=None): # This part is done 
                 continue
             res = res.strip()
             if res:
-                _msg_queue.put(res)
-                q = _msg_queue.qsize()
+                enqueue(res)
+                q = queue_size()
                 print_formatted_text(FormattedText([
                     ('class:queue-tag', f'  ✓ queued ({q})'),
                 ]), style=style)
@@ -325,11 +306,6 @@ def end():
     time.sleep(0.5)
     c.clear()
 
-def reply(model, content):
-    rule(f"[cyan]───[/] {model} [white][/]", align="left", style="cyan")
-    cp(md(content or ""))
-    print("\n")
-
 def main_panel():
     cwd = os.path.basename(os.getcwd()) or os.getcwd()
     left = logo()
@@ -354,18 +330,6 @@ def main_panel():
     )
 
     pnl(grid, title="[white]アイリス[/]", title_align="left")
-
-#class IrisCompleter(Completer):
- #   def get_completions(self,document,complete_event):
-  #      text = document.text_before_cursor
-   #     word = document.get_word_before_cursor(WORD=True)
-
-    #    if text.startswith('@'):
-     #       query = word[1:]
-
-      #      for name in os.listdir("."):
-       #         if name.startswith(query):
-        #            suffix = "/" if os.path.isdir(name) else "" yield Completion(name + suffix, start_position=-len(query), display=name + suffix, display_meta="file" if os.path.isfile(name) else "dir",)
 
 if __name__ == "__main__":
     prompt("hiiii")
