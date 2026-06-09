@@ -2,6 +2,9 @@ import requests as rq
 import os
 import json
 import sys
+from tools import TOOLS, run_tool_call
+
+MAX_TOOL_STEPS = 8
 
 def _load_settings():
     try:
@@ -42,17 +45,45 @@ def ask_ai(messages):
         "Content-Type": "application/json",
     }
 
-    payload = {
-        "model": F["MODEL"],
-        "messages":messages,
-    }
+    convo = list(messages)
 
     try:
-        res = rq.post(url=F['URL'], headers=headers, json=payload)
-        res.raise_for_status()
-        data = res.json()
-        msg = data["choices"][0]["message"]
-        return msg
+        for _ in range(MAX_TOOL_STEPS):
+            payload = {
+                "model": F["MODEL"],
+                "messages": convo,
+                "tools": TOOLS,
+            }
+            res = rq.post(url=F['URL'], headers=headers, json=payload)
+            res.raise_for_status()
+            data = res.json()
+            msg = data["choices"][0]["message"]
+            tool_calls = msg.get("tool_calls") or []
+
+            if not tool_calls:
+                if not (msg.get("content") or "").strip():
+                    msg["content"] = "I finished the tool calls but the model returned no final text."
+                return msg
+
+            convo.append(
+                {
+                    "role": "assistant",
+                    "content": msg.get("content") or "",
+                    "tool_calls": tool_calls,
+                }
+            )
+
+            for tool_call in tool_calls:
+                convo.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tool_call["id"],
+                        "name": tool_call["function"]["name"],
+                        "content": run_tool_call(tool_call),
+                    }
+                )
+
+        return {"error": f"Tool loop exceeded {MAX_TOOL_STEPS} steps"}
     except rq.exceptions.Timeout:
         return {"error": "Request Timeout"}
     except rq.exceptions.HTTPError as e:
@@ -108,5 +139,3 @@ def thinking(data):
 
 def response(data):
     return data.get("content") or ""
-
-

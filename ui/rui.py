@@ -13,8 +13,14 @@ from rich.text import Text
 from ui.logo import logo
 from ui.ui import ui
 from sv1 import F
+from tools import (
+    has_pending_permission,
+    get_pending_permission,
+    resolve_pending_permission,
+)
 import time
 import os
+import re
 import shutil
 import queue as queue_module
 
@@ -39,7 +45,41 @@ style = Style.from_dict({
     'think-dim':    'italic #585b70',
 })
 
-ses = PromptSession(style=style)
+
+class AtPathCompleter(Completer):
+    def get_completions(self, document, complete_event):
+        match = re.search(r"(^|\s)@([^\s@]*)$", document.text_before_cursor)
+        if not match:
+            return
+
+        fragment = match.group(2)
+        expanded = os.path.expanduser(fragment)
+        parent = os.path.dirname(expanded) or "."
+        prefix = os.path.basename(expanded)
+
+        try:
+            names = os.listdir(parent)
+        except OSError:
+            return
+
+        for name in sorted(names, key=lambda item: (not os.path.isdir(os.path.join(parent, item)), item.lower())):
+            if not name.startswith(prefix):
+                continue
+
+            candidate = os.path.join(parent, name)
+            completed = os.path.join(os.path.dirname(fragment), name) if os.path.dirname(fragment) else name
+            if os.path.isdir(candidate):
+                completed += "/"
+
+            yield Completion(
+                completed,
+                start_position=-len(fragment),
+                display=completed,
+                display_meta="dir" if os.path.isdir(candidate) else "file",
+            )
+
+
+ses = PromptSession(style=style, completer=AtPathCompleter())
 c = Console()
 
 # ══════════════════════════════════════════════════════════════════════
@@ -117,6 +157,40 @@ def prompt(model):
     _rule_ptk()
     return usr
 
+
+def _permission_preview(text, limit=240):
+    text = text.replace("\t", "    ")
+    if len(text) <= limit:
+        return text
+    return text[:limit] + "\n...[truncated]"
+
+
+def _handle_permission_prompt():
+    req = get_pending_permission()
+    if not req:
+        return
+
+    path = req["path"]
+    content = req["content"]
+    action = "overwrite" if os.path.exists(os.path.expanduser(path)) else "create"
+
+    print_formatted_text(FormattedText([
+        ('class:label', f' write permission required '),
+    ]), style=style)
+    print_formatted_text(FormattedText([
+        ('class:value', f' {action}: {path}\n'),
+        ('class:hint', f' size: {len(content)} chars\n'),
+        ('class:hint', ' preview:\n'),
+        ('class:value', _permission_preview(content) + '\n'),
+    ]), style=style)
+
+    try:
+        ans = ses.prompt([('class:arrow', ' allow write? [y/N] ')]).strip().lower()
+    except (KeyboardInterrupt, EOFError):
+        ans = ""
+
+    resolve_pending_permission(ans in ("y", "yes"))
+
 def queue(model, ai_done_event, first_chunk_received=None): # This part is done by AI (gemini 3.5 flash (high) Through Antigravity!
     """Interactive queue prompt showing dynamic thinking animation spinner."""
     import time
@@ -146,6 +220,15 @@ def queue(model, ai_done_event, first_chunk_received=None): # This part is done 
     def my_inputhook(context):
         nonlocal spinner_index
         while not context.input_is_ready():
+            if has_pending_permission():
+                try:
+                    app = get_app()
+                    if app.is_running:
+                        app.exit(result="__PERMISSION__")
+                except Exception:
+                    pass
+                break
+
             if ai_done_event.is_set() or (first_chunk_received and first_chunk_received.is_set()):
                 try:
                     app = get_app()
@@ -170,6 +253,9 @@ def queue(model, ai_done_event, first_chunk_received=None): # This part is done 
             res = ses.prompt(get_prompt_text, inputhook=my_inputhook)
             if res == "__AI_DONE__":
                 break
+            if res == "__PERMISSION__":
+                _handle_permission_prompt()
+                continue
             res = res.strip()
             if res:
                 _msg_queue.put(res)

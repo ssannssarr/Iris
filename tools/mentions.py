@@ -1,5 +1,5 @@
 import re
-from tools import read_file
+from .read_file import read_file
 
 def expand_mentions(text):
 	paths = re.findall(r"@([\w./~\\-]+)", text)
