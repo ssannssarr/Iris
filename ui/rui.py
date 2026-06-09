@@ -1,22 +1,26 @@
 from prompt_toolkit.shortcuts import print_formatted_text
 from prompt_toolkit.formatted_text import FormattedText
 from prompt_toolkit.completion import Completer, Completion
-from rich.markdown import Markdown as md
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 from rich.console import Console
-from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 from rich.rule import Rule
 from rich.text import Text
 from ui.logo import logo
-from ui.ui import ui
-from sv1 import F
+from ui.theme import ui
+from llm import F
+from queue_state import enqueue, queue_size
+from tools import (
+    has_pending_permission,
+    get_pending_permission,
+    resolve_pending_permission,
+)
 import time
 import os
+import re
 import shutil
-import queue as queue_module
 
 # ── Catppuccin-inspired prompt_toolkit style ──────────────────────────
 style = Style.from_dict({
@@ -39,25 +43,42 @@ style = Style.from_dict({
     'think-dim':    'italic #585b70',
 })
 
-ses = PromptSession(style=style)
+
+class AtPathCompleter(Completer):
+    def get_completions(self, document, complete_event):
+        match = re.search(r"(^|\s)@([^\s@]*)$", document.text_before_cursor)
+        if not match:
+            return
+
+        fragment = match.group(2)
+        expanded = os.path.expanduser(fragment)
+        parent = os.path.dirname(expanded) or "."
+        prefix = os.path.basename(expanded)
+
+        try:
+            names = os.listdir(parent)
+        except OSError:
+            return
+
+        for name in sorted(names, key=lambda item: (not os.path.isdir(os.path.join(parent, item)), item.lower())):
+            if not name.startswith(prefix):
+                continue
+
+            candidate = os.path.join(parent, name)
+            completed = os.path.join(os.path.dirname(fragment), name) if os.path.dirname(fragment) else name
+            if os.path.isdir(candidate):
+                completed += "/"
+
+            yield Completion(
+                completed,
+                start_position=-len(fragment),
+                display=completed,
+                display_meta="dir" if os.path.isdir(candidate) else "file",
+            )
+
+
+ses = PromptSession(style=style, completer=AtPathCompleter())
 c = Console()
-
-# ══════════════════════════════════════════════════════════════════════
-#  Message Queue
-# ══════════════════════════════════════════════════════════════════════
-_msg_queue = queue_module.Queue()
-
-def queue_size():
-    return _msg_queue.qsize()
-
-def enqueue(text):
-    _msg_queue.put(text)
-
-def dequeue():
-    try:
-        return _msg_queue.get_nowait()
-    except queue_module.Empty:
-        return None
 
 # ══════════════════════════════════════════════════════════════════════
 #  UI styling & layout functions
@@ -117,6 +138,40 @@ def prompt(model):
     _rule_ptk()
     return usr
 
+
+def _permission_preview(text, limit=240):
+    text = text.replace("\t", "    ")
+    if len(text) <= limit:
+        return text
+    return text[:limit] + "\n...[truncated]"
+
+
+def _handle_permission_prompt():
+    req = get_pending_permission()
+    if not req:
+        return
+
+    path = req["path"]
+    content = req["content"]
+    action = "overwrite" if os.path.exists(os.path.expanduser(path)) else "create"
+
+    print_formatted_text(FormattedText([
+        ('class:label', f' write permission required '),
+    ]), style=style)
+    print_formatted_text(FormattedText([
+        ('class:value', f' {action}: {path}\n'),
+        ('class:hint', f' size: {len(content)} chars\n'),
+        ('class:hint', ' preview:\n'),
+        ('class:value', _permission_preview(content) + '\n'),
+    ]), style=style)
+
+    try:
+        ans = ses.prompt([('class:arrow', ' allow write? [y/N] ')]).strip().lower()
+    except (KeyboardInterrupt, EOFError):
+        ans = ""
+
+    resolve_pending_permission(ans in ("y", "yes"))
+
 def queue(model, ai_done_event, first_chunk_received=None): # This part is done by AI (gemini 3.5 flash (high) Through Antigravity!
     """Interactive queue prompt showing dynamic thinking animation spinner."""
     import time
@@ -132,7 +187,7 @@ def queue(model, ai_done_event, first_chunk_received=None): # This part is done 
     # Define dynamic prompt function
     def get_prompt_text():
         frame = spinner_frames[spinner_index % len(spinner_frames)]
-        q = _msg_queue.qsize()
+        q = queue_size()
         
         parts = [
             ('class:spinner', f' {frame} '),
@@ -146,6 +201,15 @@ def queue(model, ai_done_event, first_chunk_received=None): # This part is done 
     def my_inputhook(context):
         nonlocal spinner_index
         while not context.input_is_ready():
+            if has_pending_permission():
+                try:
+                    app = get_app()
+                    if app.is_running:
+                        app.exit(result="__PERMISSION__")
+                except Exception:
+                    pass
+                break
+
             if ai_done_event.is_set() or (first_chunk_received and first_chunk_received.is_set()):
                 try:
                     app = get_app()
@@ -170,10 +234,13 @@ def queue(model, ai_done_event, first_chunk_received=None): # This part is done 
             res = ses.prompt(get_prompt_text, inputhook=my_inputhook)
             if res == "__AI_DONE__":
                 break
+            if res == "__PERMISSION__":
+                _handle_permission_prompt()
+                continue
             res = res.strip()
             if res:
-                _msg_queue.put(res)
-                q = _msg_queue.qsize()
+                enqueue(res)
+                q = queue_size()
                 print_formatted_text(FormattedText([
                     ('class:queue-tag', f'  ✓ queued ({q})'),
                 ]), style=style)
@@ -239,11 +306,6 @@ def end():
     time.sleep(0.5)
     c.clear()
 
-def reply(model, content):
-    rule(f"[cyan]───[/] {model} [white][/]", align="left", style="cyan")
-    cp(md(content or ""))
-    print("\n")
-
 def main_panel():
     cwd = os.path.basename(os.getcwd()) or os.getcwd()
     left = logo()
@@ -268,18 +330,6 @@ def main_panel():
     )
 
     pnl(grid, title="[white]アイリス[/]", title_align="left")
-
-#class IrisCompleter(Completer):
- #   def get_completions(self,document,complete_event):
-  #      text = document.text_before_cursor
-   #     word = document.get_word_before_cursor(WORD=True)
-
-    #    if text.startswith('@'):
-     #       query = word[1:]
-
-      #      for name in os.listdir("."):
-       #         if name.startswith(query):
-        #            suffix = "/" if os.path.isdir(name) else "" yield Completion(name + suffix, start_position=-len(query), display=name + suffix, display_meta="file" if os.path.isfile(name) else "dir",)
 
 if __name__ == "__main__":
     prompt("hiiii")

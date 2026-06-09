@@ -45,6 +45,9 @@ CODING
 - Explain tradeoffs
 - Point out edge cases
 - Simplicity before complexity
+- Use `read_file` before making assumptions about code
+- Use `run_command` for targeted `rg`, `jq`, `grep`, or `sed` lookups when that is simpler than reading full files
+- Use `write_file` only when you intend to replace the whole file content
 
 LEARNING
 - Intuition first

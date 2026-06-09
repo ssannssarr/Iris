@@ -3,18 +3,16 @@ from ui.rui import (
     prompt,
     queue,
     c,
-    reply,
     end,
     show_queued_input,
-    dequeue,
-    style
 )
-import time
-import sys
-import shutil
+from rich.markdown import Markdown as md
+from queue_state import dequeue
 import threading
-from sv1 import ask_ai, thinking, response, F
-from ui.msg_state import add, out, render,to_api
+from llm import ask_ai, thinking, response, F
+from state import add, out
+from api_format import to_api
+from ui.render import render
 
 c.clear()
 model = F.get("MODEL")
@@ -63,7 +61,7 @@ try:
         data = result_container.get('data', {"error": "No response returned"})
 
         if "error" in data:
-            reply(model="error", content=data["error"])
+            c.print(md(data["error"]))
             continue
 
         res = response(data=data)
@@ -80,4 +78,3 @@ try:
         render(r, model=model)
 except (KeyboardInterrupt,EOFError):
     end()
-
