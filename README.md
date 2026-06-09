@@ -1,4 +1,6 @@
-# アイリス / Iris
+<h1 align="center">アイリス / Iris</h1>
+
+---
 
 A small terminal AI companion built with Python.
 
