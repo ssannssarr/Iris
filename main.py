@@ -6,16 +6,18 @@ from ui.rui import (
     end,
     show_queued_input,
 )
-from rich.markdown import Markdown as md
 from queue_state import dequeue
 import threading
 from llm import ask_ai, thinking, response, F
 from state import add, out
 from api_format import to_api
 from ui.render import render
+from ui.events import event
+from tools import set_event_sink
 
 c.clear()
 model = F.get("MODEL")
+set_event_sink(event)
 main_panel()
 usr_in=""
 try:
@@ -61,7 +63,7 @@ try:
         data = result_container.get('data', {"error": "No response returned"})
 
         if "error" in data:
-            c.print(md(data["error"]))
+            event("error", "Request failed", data["error"])
             continue
 
         res = response(data=data)

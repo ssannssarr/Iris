@@ -1,6 +1,10 @@
 from prompt_toolkit.shortcuts import print_formatted_text
 from prompt_toolkit.formatted_text import FormattedText
 from prompt_toolkit.completion import Completer, Completion
+from prompt_toolkit.application import run_in_terminal
+from prompt_toolkit.application.current import get_app
+import asyncio
+import inspect
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 from rich.console import Console
@@ -84,7 +88,30 @@ c = Console()
 #  UI styling & layout functions
 # ══════════════════════════════════════════════════════════════════════
 def cp(*args, **kwargs):
-    c.print(*args, **kwargs)
+    def render():
+        c.print(*args, **kwargs)
+
+    try:
+        app = get_app()
+        if getattr(app, "is_running", False):
+            def schedule():
+                result = run_in_terminal(render)
+                if inspect.iscoroutine(result):
+                    if hasattr(app, "create_background_task"):
+                        app.create_background_task(result)
+                    else:
+                        asyncio.create_task(result)
+
+            loop = getattr(app, "loop", None)
+            if loop and hasattr(loop, "call_soon_threadsafe"):
+                loop.call_soon_threadsafe(schedule)
+            else:
+                schedule()
+            return
+    except Exception:
+        pass
+
+    render()
 
 def pnl(*args, **kwargs):
     p = config("panel")
