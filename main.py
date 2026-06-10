@@ -18,7 +18,7 @@ from tools import set_event_sink
 c.clear()
 model = F.get("MODEL")
 set_event_sink(event)
-main_panel()
+main_panel(model)
 usr_in=""
 try:
     while True:
@@ -38,7 +38,7 @@ try:
         add('user',usr_in)
         r = out()
         c.clear()
-        main_panel()
+        main_panel(model)
         render(r,model=model)
 
         # Run AI request in a background thread to allow animated spinner and input queueing
@@ -76,7 +76,7 @@ try:
             r[-1]['reasoning'] = thought
 
         c.clear()
-        main_panel()
+        main_panel(model)
         render(r, model=model)
 except (KeyboardInterrupt,EOFError):
     end()
