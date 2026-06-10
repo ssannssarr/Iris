@@ -7,6 +7,6 @@ from .rui import (rule,
 	main_panel,
 	reply,
 	c,
-	AtPathCompleter,
-	cp
+	cp,
 	)
+from .rui import AtPathCompleter

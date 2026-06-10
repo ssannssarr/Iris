@@ -21,11 +21,11 @@ try:
     while True:
         usr_in = ses.prompt([('class:arrow', ' ❯ ')]).strip()
 
-        if usr_in.lower().strp() == "/exit":
+        if usr_in.lower() == "/exit":
             cp("[#FFDAB9]✦ BYE~~[/]")
             save_msg(messages)
             break
-            
+
 
         if not usr_in:
         	continue
@@ -37,6 +37,12 @@ try:
                        spinner="dots", spinner_style="#AB82FF"
                     ):
         		data = ask_ai(to_api())
+
+        if "error" in data:
+        	_rule_ptk()
+        	event("error", "Request failed", data["error"])
+        	_rule_ptk()
+        	continue
 
         res = response(data=data)
         thnk = thinking(data=data)
