@@ -1,3 +1,4 @@
+from rich.markdown import Markdown as md
 from prompt_toolkit.shortcuts import print_formatted_text
 from prompt_toolkit.formatted_text import FormattedText
 from prompt_toolkit.completion import Completer, Completion
@@ -44,7 +45,7 @@ style = Style.from_dict({
     'think-label':  'bold #74c7ec',
     'think-border': '#45475a',
     'think-text':   '#a6adc8',
-    'think-dim':    'italic #585b70',
+    'think-dim':    'italic #585b70', 
 })
 
 
@@ -333,16 +334,16 @@ def end():
     time.sleep(0.5)
     c.clear()
 
-def main_panel():
+def main_panel(model):
     cwd = os.path.basename(os.getcwd()) or os.getcwd()
     left = logo()
 
     right = Text()
     right.append("\n")
     right.append('\n')
-    right.append("Iris by SannS")
-    right.append("\n")
-    right.append(f"model: {F.get('MODEL')}\n", style="dim")
+    right.append("Iris by SannS\n")
+    right.append("")
+    right.append(f"model: {model}\n", style="dim")
     right.append(f"cwd: {cwd}\n", style="dim")
 
     grid = Table.grid(expand=True)
@@ -357,6 +358,14 @@ def main_panel():
     )
 
     pnl(grid, title="[white]アイリス[/]", title_align="left")
+
+def reply(res):
+    safe_text = res.replace("\n", "\n  ")
+    rule(style="dim")
+    cp(md(f"* {safe_text}"))
+    print()
+    rule(style="dim")
+
 
 if __name__ == "__main__":
     prompt("hiiii")
