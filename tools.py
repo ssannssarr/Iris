@@ -35,7 +35,6 @@ def mention_handler(prompt: str):
 		os.system(cmd)
 
 
-
 def main():
 	while True:
 		prompt = input(': ').strip()
@@ -44,10 +43,16 @@ def main():
 		mention_handler(prompt)
 		file = mention_expandiser(prompt)
 		if file:
-			print(read_file(file))
+			 	print(read_file(file))
 
 if __name__ == '__main__':
 	try:
 		main()
 	except KeyboardInterrupt:
 		print('\nBYE!!')
+
+
+
+TOOL_MAPPING = {
+	'read_file' : read_file
+}
