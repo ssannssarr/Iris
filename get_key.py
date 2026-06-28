@@ -8,4 +8,5 @@ def key():
 		[yellow]hint: export OPENROUTER_API_KEY="<your-key-here>"[/]
 		[yellow]hint: get API key from https://openrouter.ai[/]
 		''')
+		exit()
 	return API_KEY

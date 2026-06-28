@@ -34,7 +34,6 @@ def read_file_line(filename:str,start_char:int,end_char:int):
 def run_shell_command(cmd):
     sensitive_cmd=('rm','rm -rf','rmv')
     if not cmd in sensitive_cmd:
-        cmd = cmd.split()
         result = sp.run(cmd,capture_output=True,shell=True,text=True)
         if result.returncode != 0:
             return result.stderr 
@@ -46,7 +45,7 @@ def run_shell_command(cmd):
 def mention_handler(prompt: str):
     prompt_list = prompt.split()
     if prompt_list[0].startswith('!'):
-        cmd = prompt.strip('!')
+        cmd = prompt.removeprefix('!').strip()
         print(run_shell_command(cmd))
         return True
 
@@ -146,7 +145,10 @@ def run_tool_loop(chat_history):
                 
                 # Execute the mapped function
                 if func_name in TOOL_MAPPING:
-                    result = TOOL_MAPPING[func_name](**func_args)
+                    try:
+                        result = TOOL_MAPPING[func_name](**func_args)
+                    except Exception as e:
+                        result = f'Error executing tool: {str(e)}'
                 else:
                     result = "Error: Tool not found"
                     
