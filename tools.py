@@ -25,22 +25,19 @@ def read_file(filename):
     else:
         return 'File doesnt exist'
 
-def read_file_line(filename:str,start_char:int,end_char:int):
+def read_file_chars(filename:str,start_char:int,end_char:int):
     if Path(filename).exists():
         with open(filename,'r') as file:
             return file.read()[start_char:end_char]
 
 
 def run_shell_command(cmd):
-    sensitive_cmd=('rm','rm -rf','rmv')
-    if not cmd in sensitive_cmd:
-        result = sp.run(cmd,capture_output=True,shell=True,text=True)
-        if result.returncode != 0:
-            return result.stderr 
-
-        return result.stdout
-    else:
-        return 'This commands are restricted by devloper!'
+    sensitive_cmds = ('rm ', 'rm -rf ', 'rmv ')
+    if any(cmd.startswith(prefix) for prefix in sensitive_cmds):
+        return 'This command is restricted by the developer!'
+        
+    result = sp.run(cmd, capture_output=True, shell=True, text=True)
+    return result.stderr if result.returncode != 0 else result.stdout
 
 def mention_handler(prompt: str):
     prompt_list = prompt.split()
@@ -74,7 +71,8 @@ if __name__ == '__main__':
 
 TOOL_MAPPING = {
     'read_file': read_file,
-    'run_shell_command': run_shell_command
+    'run_shell_command': run_shell_command,
+    'read_file_chars': read_file_chars
 }
 
 
@@ -110,6 +108,31 @@ TOOL_REGISTRY = [
                     }
                 },
                 'required':['cmd']
+            }
+        }
+    },
+    {
+        'type':'function',
+        'function':{
+            'name':'read_file_chars',
+            'description':'Read files specific chars.',
+            'parameters':{
+                'type':'object',
+                'properties':{
+                    'filename':{
+                        'type':'string',
+                        'description':'The name of file t be read'
+                    },
+                    'start_char':{
+                        'type':'integer',
+                        'description':'the startung character no for reading the file.'
+                    },
+                    'end_char':{
+                        'type':'integer',
+                        'description':'The ending point of rading the file.'
+                    }
+                },
+                'required':['filename','start_char','end_char']
             }
         }
     }
