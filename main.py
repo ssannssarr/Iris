@@ -17,7 +17,8 @@ def main():
             usr_in = input(': ').strip()
             if not usr_in:
                 continue
-            mention_handler(usr_in)
+            if mention_handler(usr_in):
+                continue
             add(role='user', content=usr_in)
             
             # 1. Run the tool loop 
