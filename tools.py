@@ -1,5 +1,8 @@
 import os 
 from pathlib import Path
+from SDK import api_with_tools
+import json
+
 
 def mention_expandiser(prompt: str):
 	prompt_list = prompt.split()
@@ -53,6 +56,72 @@ if __name__ == '__main__':
 
 
 
+
 TOOL_MAPPING = {
-	'read_file' : read_file
+    'read_file': read_file
 }
+
+
+TOOL_REGISTRY = [
+    {
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": "Reads the content of a specified file. If the file exceeds 4000 characters, it returns only the first 4000 characters with a truncation note.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "filename": {
+                        "type": "string",
+                        "description": "The name or relative/absolute path of the file to read."
+                    }
+                },
+                "required": ["filename"]
+            }
+        }
+    }
+]
+
+def run_tool_loop(chat_history):
+    """
+    The Agentic Loop:
+    1. Sends history + tools to API.
+    2. If tool_calls are returned, executes them locally and appends results.
+    3. Loops until the model returns a normal text response.
+    """
+    while True:
+        response = api_with_tools(chat_history, tools=TOOL_REGISTRY)
+        if not response:
+            return "Error: API request failed."
+            
+        message = response['choices'][0]['message']
+        
+        # Check if the model wants to use a tool
+        if message.get('tool_calls'):
+            # 1. Append the assistant's tool call request to history
+            chat_history.append(message)
+            
+            # 2. Execute each tool call locally
+            for tool_call in message['tool_calls']:
+                func_name = tool_call['function']['name']
+                func_args = json.loads(tool_call['function']['arguments'])
+                
+                print(f"\n-> Calling tool: {func_name}({func_args})")
+                
+                # Execute the mapped function
+                if func_name in TOOL_MAPPING:
+                    result = TOOL_MAPPING[func_name](**func_args)
+                else:
+                    result = "Error: Tool not found"
+                    
+                # 3. Append tool result back to history
+                chat_history.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call['id'],
+                    "content": str(result)
+                })
+        else:
+            # No tool calls! The model gave a final text response.
+            # Append it to history and break the loop.
+            chat_history.append(message)
+            return message.get('content', '')
